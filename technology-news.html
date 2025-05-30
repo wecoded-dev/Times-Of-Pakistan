@@ -334,7 +334,7 @@
         }
 
         data.results.forEach(news => {
-          const img = news.image_url || "https://source.unsplash.com/600x400/?pakistan,news";
+          const img = news.image_url || "cover.png";
           const desc = news.description ? news.description.slice(0, 140) + "..." : "";
 
           const card = document.createElement("div");
