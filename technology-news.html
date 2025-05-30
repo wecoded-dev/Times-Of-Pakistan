@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pakistan News - Ultra Luxurious</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fa;
+      padding: 2rem;
+    }
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2.8rem;
+      color: #111;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+    .news-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      transition: 0.3s ease;
+    }
+    .news-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    }
+    .news-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .news-body {
+      padding: 1.5rem;
+    }
+    .news-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: #111;
+      margin-bottom: 0.5rem;
+    }
+    .news-desc {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+    .read-more {
+      text-decoration: none;
+      background: #000;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-weight: 500;
+    }
+    .loading {
+      text-align: center;
+      color: #777;
+      font-size: 1.2rem;
+    }
+    .load-more {
+      display: block;
+      text-align: center;
+      margin: 2rem auto 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🇵🇰 Pakistan News</h1>
+  <div id="news-container" class="grid">
+    <div class="loading">Loading news...</div>
+  </div>
+  <button id="loadMore" class="btn btn-dark load-more">Load More</button>
+
+  <script>
+    const apiKey = "pub_f20dae3d9115496b90d349ad83052dfa";
+    let nextPageToken = "";
+    const container = document.getElementById("news-container");
+    const loadMoreBtn = document.getElementById("loadMore");
+
+    async function fetchNews() {
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.innerText = "Loading...";
+
+      let url = `https://newsdata.io/api/1/news?apikey=${apiKey}&country=pk&language=en&category=technology`;
+      if (nextPageToken) url += `&page=${nextPageToken}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        container.querySelector(".loading")?.remove();
+
+        if (!data.results || data.results.length === 0) {
+          loadMoreBtn.innerText = "No More News";
+          return;
+        }
+
+        data.results.forEach(news => {
+          const img = news.image_url || "https://source.unsplash.com/600x400/?pakistan,news";
+          const desc = news.description ? news.description.slice(0, 140) + "..." : "";
+
+          const card = document.createElement("div");
+          card.className = "news-card";
+          card.innerHTML = `
+            <img src="${img}" class="news-img" alt="News" />
+            <div class="news-body">
+              <div class="news-title">${news.title}</div>
+              <div class="news-desc">${desc}</div>
+              <a href="${news.link}" target="_blank" class="read-more">Read More</a>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        nextPageToken = data.nextPage || null;
+
+        if (!nextPageToken) {
+          loadMoreBtn.innerText = "All News Loaded";
+          loadMoreBtn.disabled = true;
+        } else {
+          loadMoreBtn.innerText = "Load More";
+          loadMoreBtn.disabled = false;
+        }
+
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = "<div class='loading'>Failed to load news.</div>";
+        loadMoreBtn.innerText = "Try Again";
+        loadMoreBtn.disabled = false;
+      }
+    }
+
+    loadMoreBtn.addEventListener("click", fetchNews);
+    fetchNews();
+  </script>
+</body>
+</html>
